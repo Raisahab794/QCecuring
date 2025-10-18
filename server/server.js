@@ -3,8 +3,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const xss = require('xss-clean');
 const connectDB = require('./config/db');
-const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
 require('dotenv').config();
 
 // Connect to Database
@@ -12,18 +10,9 @@ connectDB();
 
 const app = express();
 
-// Enhanced security middleware
+// Basic security middleware
 app.use(helmet()); // Security headers
 app.use(xss()); // Sanitize inputs
-app.use(mongoSanitize()); // Prevent MongoDB Injection
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later'
-});
-app.use('/api/', limiter);
 
 // CORS configuration
 app.use(cors({
@@ -32,7 +21,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json({ limit: '10kb' })); // Parse JSON bodies with size limit
+app.use(express.json()); // Parse JSON bodies
 
 // Routes
 app.use('/api/tasks', require('./routes/taskRoutes'));
@@ -54,11 +43,3 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  app.close(() => {
-    console.log('Process terminated');
-  });
-});
