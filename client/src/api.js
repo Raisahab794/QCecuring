@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+// Use environment variable for API URL or fall back to localhost in development
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance with basic auth
 const api = axios.create({
@@ -10,6 +11,19 @@ const api = axios.create({
     'Authorization': 'Basic ' + btoa('admin:password123')
   }
 });
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  response => response,
+  error => {
+    // Log errors or handle specific status codes
+    if (error.response && error.response.status === 401) {
+      console.error('Authentication error');
+      // Handle auth error (redirect to login, etc.)
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Tasks API
 export const fetchTasks = async (page = 1, limit = 5, search = '') => {

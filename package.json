@@ -1,0 +1,25 @@
+{
+  "name": "task-manager-dashboard",
+  "version": "1.0.0",
+  "description": "A modern task management system with audit logging",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "server": "nodemon server/server.js",
+    "client": "cd client && npm start",
+    "client-install": "cd client && npm install",
+    "server-install": "cd server && npm install",
+    "install-all": "npm run server-install && npm run client-install",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "cd client && npm install && npm run build",
+    "render-postbuild": "npm install --prefix server && npm install --prefix client && npm run build --prefix client"
+  },
+  "author": "Ayush Kumar Rai",
+  "license": "MIT",
+  "dependencies": {
+    "concurrently": "^7.0.0"
+  }
+}
