@@ -17,7 +17,7 @@ app.use(xss()); // Sanitize inputs
 
 // Determine client URL based on environment
 const clientURL = process.env.NODE_ENV === 'production' 
-  ? process.env.CLIENT_URL || 'https://task-manager-dashboard.vercel.app'
+  ? process.env.CLIENT_URL || 'https://qcecuring-4.onrender.com'
   : 'http://localhost:3000';
 
 // CORS configuration
