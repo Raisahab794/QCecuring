@@ -3,12 +3,10 @@ import React from 'react';
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const pages = [];
   
-  // Generate page numbers
   for (let i = 1; i <= totalPages; i++) {
     pages.push(i);
   }
   
-  // Don't render pagination if only one page
   if (totalPages <= 1) {
     return null;
   }

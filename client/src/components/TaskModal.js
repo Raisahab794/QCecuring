@@ -3,22 +3,49 @@ import React, { useState, useEffect } from 'react';
 const TaskModal = ({ isOpen, onClose, onSubmit, task }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [errors, setErrors] = useState({});
   
   useEffect(() => {
     if (task) {
-      // Edit mode - populate form
       setTitle(task.title || '');
       setDescription(task.description || '');
     } else {
-      // Create mode - reset form
       setTitle('');
       setDescription('');
     }
+    setErrors({});
   }, [task, isOpen]);
+  
+  const validateForm = () => {
+    let formErrors = {};
+    let isValid = true;
+    
+    if (!title.trim()) {
+      formErrors.title = 'Title is required';
+      isValid = false;
+    } else if (title.length > 100) {
+      formErrors.title = 'Title cannot exceed 100 characters';
+      isValid = false;
+    }
+    
+    if (!description.trim()) {
+      formErrors.description = 'Description is required';
+      isValid = false;
+    } else if (description.length > 500) {
+      formErrors.description = 'Description cannot exceed 500 characters';
+      isValid = false;
+    }
+    
+    setErrors(formErrors);
+    return isValid;
+  };
   
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ title, description });
+    
+    if (validateForm()) {
+      onSubmit({ title, description });
+    }
   };
   
   if (!isOpen) return null;
@@ -27,7 +54,7 @@ const TaskModal = ({ isOpen, onClose, onSubmit, task }) => {
     <div className="modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
-          <h2>Create Task</h2>
+          <h2>{task ? 'Edit Task' : 'Create Task'}</h2>
           <button className="close-button" onClick={onClose}>Close</button>
         </div>
         
@@ -42,6 +69,7 @@ const TaskModal = ({ isOpen, onClose, onSubmit, task }) => {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., Plan sprint backlog"
               />
+              {errors.title && <div className="error-message">{errors.title}</div>}
             </div>
             
             <div className="form-group">
@@ -53,6 +81,7 @@ const TaskModal = ({ isOpen, onClose, onSubmit, task }) => {
                 placeholder="Add scope, owners, and due dates"
                 rows="4"
               ></textarea>
+              {errors.description && <div className="error-message">{errors.description}</div>}
             </div>
           </form>
         </div>

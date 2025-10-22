@@ -19,7 +19,6 @@ const LogsPage = () => {
       setTotalPages(data.pagination.pages);
     } catch (err) {
       setError('Failed to load audit logs. Please try again.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -55,6 +54,11 @@ const LogsPage = () => {
     }
   };
   
+  const formatTaskId = (id) => {
+    if (!id) return '-';
+    return `#${id.substring(0, 4)}`;
+  };
+  
   const renderUpdatedContent = (content) => {
     if (!content) return '-';
     try {
@@ -67,14 +71,6 @@ const LogsPage = () => {
     } catch (err) {
       return '-';
     }
-  };
-  
-  // Format task ID to be more readable
-  const formatTaskId = (id) => {
-    if (!id) return '-';
-    
-    // Make it look like #1234 (take first 4 chars)
-    return `#${id.substring(0, 4)}`;
   };
   
   return (

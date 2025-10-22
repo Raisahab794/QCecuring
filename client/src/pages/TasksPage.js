@@ -1,11 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { fetchTasks, createTask, updateTask, deleteTask } from '../api';
 import TaskModal from '../components/TaskModal';
 import { useNavigate } from 'react-router-dom';
 
 const TasksPage = () => {
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -25,14 +25,12 @@ const TasksPage = () => {
       setTotalTasks(data.pagination.total);
     } catch (err) {
       setError('Failed to load tasks. Please try again.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
   }, [currentPage, searchTerm]);
   
-  // Load tasks when component mounts
-  React.useEffect(() => {
+  useEffect(() => {
     loadTasks();
   }, [loadTasks]);
   
@@ -50,10 +48,9 @@ const TasksPage = () => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
         await deleteTask(id);
-        loadTasks(); // Reload tasks from API
+        loadTasks();
       } catch (err) {
         setError('Failed to delete task. Please try again.');
-        console.error('Delete error:', err);
       }
     }
   };
@@ -66,7 +63,7 @@ const TasksPage = () => {
         await createTask(taskData);
       }
       setIsModalOpen(false);
-      loadTasks(); // Reload tasks from API
+      loadTasks();
     } catch (err) {
       setError('Failed to save task. Please check your inputs and try again.');
     }
@@ -95,7 +92,6 @@ const TasksPage = () => {
     return new Date(dateString).toISOString().split('T')[0];
   };
   
-  // Format task ID to be consistent
   const formatTaskId = (id) => {
     if (!id) return '#0000';
     return `#${id.substring(0, 4)}`;

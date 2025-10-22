@@ -4,8 +4,6 @@ import { NavLink, useLocation } from 'react-router-dom';
 const Layout = ({ children }) => {
   const location = useLocation();
   const path = location.pathname;
-  
-  // Set header title based on current route
   const headerTitle = path === '/logs' ? 'Audit Logs' : 'Tasks';
 
   return (
@@ -51,17 +49,17 @@ const Layout = ({ children }) => {
         <div className="header">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             {path === '/logs' ? (
-              <React.Fragment>
+              <>
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="16" x2="12" y2="12"></line>
                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </React.Fragment>
+              </>
             ) : (
-              <React.Fragment>
+              <>
                 <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
                 <path d="M2 17l10 5 10-5"></path>
                 <path d="M2 12l10 5 10-5"></path>
-              </React.Fragment>
+              </>
             )}
           </svg>
           <h1>{headerTitle}</h1>

@@ -3,10 +3,8 @@ const router = express.Router();
 const taskController = require('../controllers/taskController');
 const auth = require('../middleware/auth');
 
-// Apply authentication middleware to all routes
 router.use(auth);
 
-// Task routes
 router.get('/', taskController.getTasks);
 router.post('/', taskController.createTask);
 router.put('/:id', taskController.updateTask);

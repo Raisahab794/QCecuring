@@ -8,12 +8,11 @@ const { sanitizeInput } = require('../utils/sanitize');
 exports.getTasks = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
     
     let query = {};
     
-    // Handle search
     if (req.query.search) {
       const search = req.query.search;
       query = {
@@ -48,11 +47,9 @@ exports.getTasks = async (req, res) => {
 // Create a new task
 exports.createTask = async (req, res) => {
   try {
-    // Sanitize inputs
     const sanitizedData = sanitizeInput(req.body);
-    
-    // Validate inputs
     const errors = validateTask(sanitizedData);
+    
     if (errors.length > 0) {
       return res.status(400).json({ errors });
     }
@@ -64,7 +61,6 @@ exports.createTask = async (req, res) => {
     
     const savedTask = await newTask.save();
     
-    // Create audit log
     await Log.create({
       action: 'Create Task',
       taskId: savedTask._id,
@@ -85,35 +81,29 @@ exports.createTask = async (req, res) => {
 exports.updateTask = async (req, res) => {
   try {
     const taskId = req.params.id;
-    
-    // Check if task exists
     const task = await Task.findById(taskId);
+    
     if (!task) {
       return res.status(404).json({ error: 'Task not found' });
     }
     
-    // Sanitize inputs
     const sanitizedData = sanitizeInput(req.body);
-    
-    // Validate inputs
     const errors = validateTask(sanitizedData);
+    
     if (errors.length > 0) {
       return res.status(400).json({ errors });
     }
     
-    // Store original values for audit log
     const updatedContent = {};
     if (task.title !== sanitizedData.title) updatedContent.title = sanitizedData.title;
     if (task.description !== sanitizedData.description) updatedContent.description = sanitizedData.description;
     
-    // Update task
     task.title = sanitizedData.title;
     task.description = sanitizedData.description;
     task.updatedAt = Date.now();
     
     const updatedTask = await task.save();
     
-    // Create audit log if changes were made
     if (Object.keys(updatedContent).length > 0) {
       await Log.create({
         action: 'Update Task',
@@ -134,18 +124,14 @@ exports.deleteTask = async (req, res) => {
   try {
     const taskId = req.params.id;
     
-    // Check if task exists without validating the ObjectId
-    // This avoids the mongoose.Types.ObjectId.isValid() call that's causing the error
     try {
       const task = await Task.findById(taskId);
       if (!task) {
         return res.status(404).json({ error: 'Task not found' });
       }
       
-      // Delete task
       await Task.findByIdAndDelete(taskId);
       
-      // Create audit log
       await Log.create({
         action: 'Delete Task',
         taskId: taskId,
@@ -157,11 +143,10 @@ exports.deleteTask = async (req, res) => {
       
       res.json({ message: 'Task deleted successfully' });
     } catch (err) {
-      // Handle invalid ID format
       if (err.name === 'CastError') {
         return res.status(400).json({ error: 'Invalid task ID format' });
       }
-      throw err; // Re-throw other errors
+      throw err;
     }
   } catch (err) {
     console.error('Error deleting task:', err);

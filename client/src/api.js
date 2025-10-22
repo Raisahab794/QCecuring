@@ -1,11 +1,7 @@
 import axios from 'axios';
 
-// Use environment variable for API URL or fall back to localhost in development
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-console.log('API URL:', API_URL); // For debugging during deployment
-
-// Create axios instance with basic auth
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -14,20 +10,6 @@ const api = axios.create({
   }
 });
 
-// Add response interceptor for error handling
-api.interceptors.response.use(
-  response => response,
-  error => {
-    // Log errors or handle specific status codes
-    if (error.response && error.response.status === 401) {
-      console.error('Authentication error');
-      // Handle auth error (redirect to login, etc.)
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Tasks API
 export const fetchTasks = async (page = 1, limit = 5, search = '') => {
   try {
     const params = { page, limit };
@@ -71,7 +53,6 @@ export const deleteTask = async (id) => {
   }
 };
 
-// Logs API
 export const fetchLogs = async (page = 1, limit = 10) => {
   try {
     const response = await api.get('/logs', { params: { page, limit } });
