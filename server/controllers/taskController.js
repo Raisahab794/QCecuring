@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Task = require('../models/Task');
 const Log = require('../models/Log');
 const { validateTask } = require('../utils/validate');
@@ -133,35 +134,35 @@ exports.deleteTask = async (req, res) => {
   try {
     const taskId = req.params.id;
     
-    // Add this check to handle non-ObjectId format IDs
-    if (!mongoose.Types.ObjectId.isValid(taskId)) {
-      // For development/demo purposes, we'll pretend the task was deleted
-      if (process.env.NODE_ENV !== 'production') {
-        return res.json({ 
-          message: 'Task deleted successfully', 
-          note: 'This was a mock task ID, no actual deletion occurred'
-        });
-      } else {
+    // Check if task exists without validating the ObjectId
+    // This avoids the mongoose.Types.ObjectId.isValid() call that's causing the error
+    try {
+      const task = await Task.findById(taskId);
+      if (!task) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+      
+      // Delete task
+      await Task.findByIdAndDelete(taskId);
+      
+      // Create audit log
+      await Log.create({
+        action: 'Delete Task',
+        taskId: taskId,
+        updatedContent: {
+          title: task.title,
+          description: task.description
+        }
+      });
+      
+      res.json({ message: 'Task deleted successfully' });
+    } catch (err) {
+      // Handle invalid ID format
+      if (err.name === 'CastError') {
         return res.status(400).json({ error: 'Invalid task ID format' });
       }
+      throw err; // Re-throw other errors
     }
-    
-    // Find the task to delete
-    const task = await Task.findById(taskId);
-    if (!task) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-    
-    await Task.findByIdAndDelete(taskId);
-    
-    // Create audit log
-    await Log.create({
-      action: 'Delete Task',
-      taskId: taskId,
-      updatedContent: null
-    });
-    
-    res.json({ message: 'Task deleted successfully' });
   } catch (err) {
     console.error('Error deleting task:', err);
     res.status(500).json({ error: 'Server error occurred while deleting task' });
