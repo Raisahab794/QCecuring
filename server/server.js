@@ -29,6 +29,34 @@ app.use(cors({
 
 app.use(express.json()); // Parse JSON bodies
 
+// Add this test route before your other routes
+app.get('/api/ip-test', async (req, res) => {
+  try {
+    // Create a DNS lookup function
+    const { promisify } = require('util');
+    const dns = require('dns');
+    const lookup = promisify(dns.lookup);
+
+    // Get the server's outgoing IP by connecting to a known host
+    const { address } = await lookup(require('os').hostname());
+    
+    // Get incoming request IP
+    const requestIP = req.headers['x-forwarded-for'] || 
+                      req.connection.remoteAddress || 
+                      req.socket.remoteAddress;
+    
+    res.json({
+      serverHostname: require('os').hostname(),
+      serverOutgoingIP: address,
+      requestIP: requestIP,
+      headers: req.headers,
+      message: 'Use these IPs to whitelist in MongoDB Atlas'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // API routes
 app.use('/api/tasks', require('./routes/taskRoutes'));
 app.use('/api/logs', require('./routes/logRoutes'));
