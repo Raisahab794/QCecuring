@@ -5,17 +5,15 @@ mongoose.set('strictQuery', false);
 
 const connectDB = async () => {
   try {
-    // Add more connection options for better reliability
+    // Remove the 'directConnection' option which is incompatible with SRV URIs
     const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 30000, // Increased timeout
+      serverSelectionTimeoutMS: 30000,
       socketTimeoutMS: 45000,
       retryWrites: true,
-      w: 'majority',
-      // Add this to ensure we connect to the primary
-      readPreference: 'primary',
-      directConnection: true
+      w: 'majority'
+      // directConnection: true - REMOVED this line as it's causing the error
     };
 
     await mongoose.connect(process.env.MONGO_URI, options);
